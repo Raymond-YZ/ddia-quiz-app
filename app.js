@@ -239,13 +239,22 @@ function router(){
 function renderHome(app){
   var done = 0;
   CONTENT.chapters.forEach(function(ch){ if(chapterDone(state, ch.chapter)) done++; });
-  var rows = CONTENT.chapters.map(function(ch){
+  // Entrance cascade runs only on the first home render per session —
+  // replaying it on every back-navigation gets old fast.
+  // Remove the sessionStorage lines to animate on every visit instead.
+  var firstVisit = true;
+  try{
+    firstVisit = !sessionStorage.getItem('ddia-home-animated');
+    sessionStorage.setItem('ddia-home-animated', '1');
+  }catch(e){ /* storage unavailable: animate every time */ }
+  var rows = CONTENT.chapters.map(function(ch, i){
     var cs = chapterState(ch.chapter);
-    var cls = cs.completed ? 'chapter-row done' : 'chapter-row';
+    var cls = 'chapter-row' + (cs.completed ? ' done' : '') + (firstVisit ? ' enter' : '');
+    var delay = firstVisit ? ' style="animation-delay:' + (i * 40) + 'ms"' : '';
     var badge = cs.completed
       ? '<span class="badge done">Done · best ' + cs.best + '%</span>'
       : (cs.attempts > 0 ? '<span class="badge">Best ' + cs.best + '%</span>' : '<span class="badge">Not started</span>');
-    return '<a class="' + cls + '" href="#/chapter/' + ch.chapter + '">' +
+    return '<a class="' + cls + '"' + delay + ' href="#/chapter/' + ch.chapter + '">' +
       '<span class="num">' + ch.chapter + '</span>' +
       '<span class="meta"><span class="title">' + esc(ch.title) + '</span>' +
       '<span class="sub">' + ch.questions.length + ' questions · ' +
