@@ -635,6 +635,22 @@ function stopTimer(){ stopTimerEl(); }
 function stopTimerEl(){ if(IV && IV.timerH){ clearInterval(IV.timerH); IV.timerH = null; } }
 
 /* ---------------- grading stage ---------------- */
+function copyText(t){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(t);
+  }
+  return new Promise(function(res, rej){
+    try{
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if(ok) res(); else rej(new Error('copy failed'));
+    }catch(e){ rej(e); }
+  });
+}
+
 function renderGradeStage(app, c){
   var key = (state.settings.apiKey || '').trim();
   var qa = c.questions.map(function(q, i){
@@ -645,9 +661,27 @@ function renderGradeStage(app, c){
   var html = '<p><a href="#/capstone">← All cases</a></p>' +
     '<h1>' + esc(c.title) + ' — results</h1>' +
     '<p class="lede">' + answered + ' of ' + qa.length + ' questions answered.</p>' +
+    '<div class="row" style="margin-bottom:12px"><button class="btn ghost" id="exportqa">Copy answers for Hiro to grade</button>' +
+    '<span id="expmsg" style="font-size:13px;color:var(--muted)"></span></div>' +
     '<div id="gstage"></div>';
   app.innerHTML = html;
   var st = document.getElementById('gstage');
+
+  document.getElementById('exportqa').addEventListener('click', function(){
+    var msg = document.getElementById('expmsg');
+    var text = 'DDIA capstone — please grade my answers\nCase: ' + c.title + ' (' + c.id + ')\n\n' +
+      qa.map(function(x, i){
+        return 'Q' + (i+1) + '. ' + x.question + '\nMy answer: ' + (x.transcript || '(no answer recorded)') + '\n';
+      }).join('\n') +
+      '\nGrade the whole case 1-5 against the case rubric (5 exceptional, 4 pass, 3 maybe, 2 needs work, 1 fail), with written feedback and concepts I missed.';
+    copyText(text).then(function(){
+      msg.textContent = 'Copied — paste it into your chat with Hiro.';
+      toast('Answers copied');
+    }, function(){
+      msg.textContent = 'Copy failed in this browser — sorry.';
+      toast('Copy failed');
+    });
+  });
 
   if(key){
     st.innerHTML = '<div class="card"><p>Grading with the AI interviewer against the case rubric…</p></div>';
