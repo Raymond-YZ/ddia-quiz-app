@@ -79,8 +79,8 @@ p.lede{color:var(--muted);margin:0 0 20px;max-width:640px}
 }
 .chapter-row.done .num{background:var(--red);color:#fff}
 .chapter-row .meta{flex:1;min-width:0}
-.chapter-row .title{font-weight:700;font-size:16px}
-.chapter-row .sub{color:var(--muted);font-size:13px}
+.chapter-row .title{display:block;font-weight:700;font-size:16px}
+.chapter-row .sub{display:block;color:var(--muted);font-size:13px;margin-top:2px}
 .bar{height:8px;background:#efe9dd;border-radius:99px;overflow:hidden;margin-top:6px}
 .bar > i{display:block;height:100%;background:var(--red);border-radius:99px}
 .badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--paper);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
